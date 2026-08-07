@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NXS – Nexsiz Existence Scripts. Post-crash / post-event executable follow-up tools.">
+  <title>NXS – Nexsiz Existence Scripts</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">nex<span>siz</span></a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html">About</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="usage.html">Usage</a></li>
+        <li><a href="nxs.html" class="active">NXS</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <h1>NXS — Existence Scripts</h1>
+      <p>Post-crash / post-event executable follow-up tools. Discovery → existence &amp; depth.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="toc">
+        <h4>Contents</h4>
+        <ul>
+          <li><a href="#concept">Concept</a></li>
+          <li><a href="#official">Official Set</a></li>
+          <li><a href="#build">Build &amp; Smoke</a></li>
+          <li><a href="#auto">Auto-spawn &amp; Rate Limits</a></li>
+          <li><a href="#reaper">Async Exit Observation</a></li>
+          <li><a href="#contract">Contract Summary</a></li>
+          <li><a href="#search">Search Path</a></li>
+          <li><a href="#custom">Custom NXS</a></li>
+          <li><a href="#webhook">Webhook</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <section id="concept">
+      <div class="container">
+        <div class="section-title"><h2>Concept</h2></div>
+        <p class="section-lead">
+          Nexsiz discovers interesting events (crash, hang, new coverage, new state).  
+          NXS scripts are <strong>executable actors</strong> that deepen those findings without increasing the size or complexity of the fuzzer core.
+        </p>
+        <div class="arch-box">Nexsiz (discovery)  →  crash / hang / interesting  →  NXS (existence &amp; depth)</div>
+        <p class="mt-3">They are not passive handlers. They are full programs that can reproduce, probe, analyse, archive, or notify — and report results via exit codes.</p>
+      </div>
+    </section>
+
+    <section id="official" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title"><h2>Official Set</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Binary</th>
+                <th>Category</th>
+                <th>Exit 2 when</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>crash/auto-repro</code></td>
+                <td><code>nxs-auto-repro</code></td>
+                <td>safe, default</td>
+                <td>Crash/hang reproducible</td>
+              </tr>
+              <tr>
+                <td><code>crash/save-notify</code></td>
+                <td><code>nxs-save-notify</code></td>
+                <td>safe, default</td>
+                <td>— (exit 0)</td>
+              </tr>
+              <tr>
+                <td><code>crash/differential-probe</code></td>
+                <td><code>nxs-differential-probe</code></td>
+                <td>intrusive</td>
+                <td>Differential anomaly</td>
+              </tr>
+              <tr>
+                <td><code>hang/timeout-analyzer</code></td>
+                <td><code>nxs-timeout-analyzer</code></td>
+                <td>hang</td>
+                <td>Hard hang confirmed</td>
+              </tr>
+              <tr>
+                <td><code>external/notify-webhook</code></td>
+                <td><code>nxs-notify-webhook</code></td>
+                <td>external</td>
+                <td>— (HTTP notify)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="build">
+      <div class="container">
+        <div class="section-title"><h2>Build &amp; Smoke Tests</h2></div>
+        <div class="code-header">shell</div>
+        <pre><code>cd nxs && ./build.sh
+# → nxs/bin/nxs-*</code></pre>
+
+        <h3 class="mt-3">Contract smoke tests</h3>
+        <div class="code-header">shell</div>
+        <pre><code>cd nxs && ./tests/e2e.sh
+# optional live target:
+NXS_E2E_TARGET=127.0.0.1:21 ./tests/e2e.sh</code></pre>
+      </div>
+    </section>
+
+    <section id="auto" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title"><h2>Auto-spawn &amp; Rate Limits</h2></div>
+        <div class="code-header">shell</div>
+        <pre><code>nexsiz -h 10.0.0.5 -p 21 -m ftp --nxs default -v
+nexsiz --nxs default --nxs-list          # resolve paths, exit
+nexsiz ... --nxs intrusive --nxs-cooldown 60 --nxs-max-per-event 20 -v
+nexsiz ... --nxs external -v            # webhook (set NXS_WEBHOOK_URL)</code></pre>
+
+        <h3 class="mt-4">Rate limit controls</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Flag</th><th>Default</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>--nxs-cooldown</code></td><td>30 s</td><td>Per (event, crash_id, nxs_id)</td></tr>
+              <tr><td><code>--nxs-max-per-event</code></td><td>0 (∞)</td><td>Cap per event type</td></tr>
+              <tr><td><code>--nxs-max-total</code></td><td>0 (∞)</td><td>Cap total spawns for the campaign</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="reaper">
+      <div class="container">
+        <div class="section-title"><h2>Async Exit-Code Observation</h2></div>
+        <p>Spawn is <strong>non-blocking</strong>. A background reaper thread (<code>nxs-reaper</code>) keeps the <code>Child</code> handles and polls with <code>try_wait</code>:</p>
+        <ul class="feature-list">
+          <li>Every exit code is logged: <code>[nexsiz/nxs] exit &lt;id&gt; → &lt;code&gt; …</code></li>
+          <li><strong>Exit 2</strong> (further vulnerability / exploit-assist) is escalated as a <strong>secondary finding</strong>:
+            <ul style="margin-top: 0.5rem; padding-left: 1.25rem;">
+              <li>Atomic counter visible in status line (<code>nxs_sec</code>)</li>
+              <li>Appended to <code>{output}/nxs-findings/secondary.jsonl</code></li>
+              <li>Sidecar <code>exit_code</code> written under the NXS <code>--out</code> directory</li>
+            </ul>
+          </li>
+          <li>Fuzzer hot-path never waits on NXS; zombies are reaped by the background thread.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="contract" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title"><h2>Contract Summary</h2></div>
+        <p>Full binding contract lives in <code>nxs/CONTRACT.md</code>. Key points:</p>
+
+        <h3>Mandatory global options</h3>
+        <ul class="feature-list">
+          <li><code>--crash &lt;path&gt;</code> (or via meta)</li>
+          <li><code>--target &lt;host:port&gt;</code></li>
+          <li><code>--meta &lt;path&gt;</code>, <code>--out &lt;dir&gt;</code>, <code>--event</code>, <code>--model</code>, <code>--minimized</code></li>
+          <li><code>--help</code> / <code>--version</code></li>
+        </ul>
+
+        <h3>Exit codes</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Code</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>0</code></td><td>Completed normally, no further vulnerability indication</td></tr>
+              <tr><td><code>1</code></td><td>Operational error (missing file, unreachable target, invalid args)</td></tr>
+              <tr><td><code>2</code></td><td>Indication of further vulnerability / successful exploit-assist → <strong>escalate</strong></td></tr>
+              <tr><td><code>3</code></td><td>Internal timeout</td></tr>
+              <tr><td><code>4</code></td><td>Interrupted / cancelled</td></tr>
+              <tr><td><code>≥10</code></td><td>Script-specific success variants</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Metadata JSON</h3>
+        <p>Nexsiz writes a forward-compatible meta file before each spawn. NXS must ignore unknown fields. Minimal schema includes event, target, crash path/id, result outcome, coverage hits, etc.</p>
+      </div>
+    </section>
+
+    <section id="search">
+      <div class="container">
+        <div class="section-title"><h2>Search Path Priority</h2></div>
+        <ol class="feature-list" style="list-style: decimal; padding-left: 1.5rem;">
+          <li>Absolute path given to <code>--nxs</code></li>
+          <li><code>NEXSIZ_NXS_PATH</code> / <code>--nxs-path</code> (colon-separated)</li>
+          <li><code>~/.nexsiz/nxs/bin/</code></li>
+          <li><code>./nxs/bin/</code> (cwd)</li>
+          <li>Relative to nexsiz binary / install prefix</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="custom" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title"><h2>Custom NXS</h2></div>
+        <p>Templates are provided for C, Go, Python, and Rust.</p>
+        <div class="code-header">shell</div>
+        <pre><code>cp -r nxs/templates/rust ~/.nexsiz/nxs/src/my-chain
+cd ~/.nexsiz/nxs/src/my-chain && cargo build --release
+cp target/release/nxs-* ~/.nexsiz/nxs/bin/</code></pre>
+        <p class="mt-3">Follow the contract checklist: support required flags, honour exit codes, ignore unknown meta fields, provide stable <code>id</code>.</p>
+      </div>
+    </section>
+
+    <section id="webhook">
+      <div class="container">
+        <div class="section-title"><h2>Webhook</h2></div>
+        <div class="code-header">shell</div>
+        <pre><code>export NXS_WEBHOOK_URL=http://127.0.0.1:9000/hook
+nexsiz ... --nxs external -v
+
+# or manual:
+./nxs/bin/nxs-notify-webhook --meta output/nxs-meta/….json --url http://…</code></pre>
+        <div class="callout warning mt-3">
+          <p>HTTPS is not supported in the pure-stdlib client. Terminate TLS at a local proxy or use <code>NXS_NOTIFY_CMD</code> with curl from <code>save-notify</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container" style="text-align: center;">
+        <p class="mono text-muted" style="margin-bottom: 1.5rem;">Existence after discovery · Execute · Deepen · Exploit-assist</p>
+        <div class="btn-group">
+          <a href="usage.html" class="btn btn-primary">Back to Usage</a>
+          <a href="architecture.html" class="btn btn-secondary">Architecture</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Nexsiz · Stateful Network Protocol Fuzzer</p>
+      <p class="tagline-footer">precision over noise · depth over breadth · silence until the edge is found</p>
+      <p class="text-muted" style="margin-top: 1rem; font-size: 0.8rem;">Apache License 2.0 · Revana Clarestya</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

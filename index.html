@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nexsiz – Stateful Network Protocol Fuzzer. Precision over noise. Depth over breadth.">
+  <title>Nexsiz – Stateful Network Protocol Fuzzer</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">nex<span>siz</span></a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">About</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="usage.html">Usage</a></li>
+        <li><a href="nxs.html">NXS</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <pre class="ascii-banner">   _  _______  ______________    
+  / |/ / __/ |/_/ __/  _/_  /    
+ /    / _/_>  &lt;_\ \_/ /  / /_    
+/_/|_/___/_/|_/___/___/ /___/    </pre>
+      <h1>Stateful Network Protocol Fuzzer</h1>
+      <p class="tagline">
+        High-performance, modular, pure-Rust fuzzer engineered for red-team and APT-grade operations.
+        Built to explore the deepest regions of a protocol’s state machine.
+      </p>
+      <div class="hero-badges">
+        <span class="badge accent">v0.1.0</span>
+        <span class="badge">Pure Rust</span>
+        <span class="badge">Apache-2.0</span>
+        <span class="badge">Grey-box Ready</span>
+        <span class="badge">NXS Existence Scripts</span>
+      </div>
+      <div class="btn-group">
+        <a href="usage.html" class="btn btn-primary">Get Started</a>
+        <a href="features.html" class="btn btn-secondary">Explore Features</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="container">
+        <div class="section-title">
+          <h2>About Nexsiz</h2>
+        </div>
+        <p class="section-lead">
+          Conventional fuzzers often lose structural validity or state context when targeting complex network protocols.
+          Nexsiz is purpose-built to remain aware of protocol grammar, maintain integrity after mutation, and push deeper into state machines that others leave unexplored.
+        </p>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-icon">◆</div>
+            <h3>Precision over Volume</h3>
+            <p>Semantic-preserving hierarchical mutators respect protocol grammar. Every mutation aims for structural validity rather than raw throughput noise.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">◈</div>
+            <h3>Hybrid State Model</h3>
+            <p>Black-box response observation combined with true grey-box edge coverage. Adaptive transition prediction biases scheduling toward promising paths.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">◇</div>
+            <h3>Operational Resilience</h3>
+            <p>Intelligent connection reuse, rate-limited NXS post-discovery actors, and minimal dependency surface designed for real operational pressure.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">○</div>
+            <h3>Existence After Discovery</h3>
+            <p>NXS scripts deepen crashes and hangs automatically — auto-repro, differential probes, timeout analysis, notifications — without bloating the core.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title">
+          <h2>Design Principles</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Principle</th>
+                <th>Implementation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Semantic-preserving mutation</strong></td>
+                <td>Hierarchical field / message / sequence mutators that respect protocol grammar</td>
+              </tr>
+              <tr>
+                <td><strong>Protocol-aware integrity repair</strong></td>
+                <td>Automatic restoration of length fields, checksums, framing, and terminators after mutation</td>
+              </tr>
+              <tr>
+                <td><strong>Hybrid state model</strong></td>
+                <td>Black-box response observation + true grey-box edge coverage</td>
+              </tr>
+              <tr>
+                <td><strong>Grey-box instrumentation</strong></td>
+                <td><code>CoverageProvider</code> trait, AFL-style SHM edge map, external Frida agent</td>
+              </tr>
+              <tr>
+                <td><strong>Intelligent connection reuse</strong></td>
+                <td>Stateful TCP reuse with safety-prefix detection to prevent cross-test contamination</td>
+              </tr>
+              <tr>
+                <td><strong>Adaptive transition prediction</strong></td>
+                <td>Lightweight predictor that biases mutation scheduling toward promising state transitions</td>
+              </tr>
+              <tr>
+                <td><strong>Minimal dependency surface</strong></td>
+                <td>Default build depends only on <code>libc</code>; LibAFL is optional behind a feature flag</td>
+              </tr>
+              <tr>
+                <td><strong>Trait-based extensibility</strong></td>
+                <td>Protocol, Integrity, Oracle, and Encryptor plugins may be registered without core changes</td>
+              </tr>
+              <tr>
+                <td><strong>Differential &amp; sanitizer oracles</strong></td>
+                <td>Multi-dimensional behavioural divergence and memory-safety / protocol-anomaly detection</td>
+              </tr>
+              <tr>
+                <td><strong>NXS existence scripts</strong></td>
+                <td>Post-event executable actors with rate-limited, non-blocking spawn and asynchronous exit observation</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-title">
+          <h2>Who Is It For</h2>
+        </div>
+        <p class="section-lead">
+          Nexsiz is intended for operational use by offensive security teams, red-teamers, and researchers who need reliable, maintainable tooling under real pressure.
+        </p>
+        <ul class="feature-list">
+          <li>Deep protocol state exploration beyond surface-level fuzzing</li>
+          <li>Hybrid black/grey-box campaigns with optional Frida instrumentation</li>
+          <li>Post-crash automation that does not compromise the hot path</li>
+          <li>Extensible plugin architecture for custom protocols, oracles, and encryptors</li>
+          <li>Minimal attack surface and reproducible builds</li>
+        </ul>
+        <div class="callout mt-4">
+          <p><strong>Philosophy:</strong> Offensive tooling must execute correctly, remain maintainable under operational pressure, and preserve the operator’s ability to reason about the exact behaviour the target exhibited.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container" style="text-align: center;">
+        <h2 style="margin-bottom: 1rem;">Ready to go deeper?</h2>
+        <p class="text-muted" style="margin-bottom: 2rem;">Explore the full feature set or jump straight into the usage guide.</p>
+        <div class="btn-group">
+          <a href="features.html" class="btn btn-primary">Features</a>
+          <a href="usage.html" class="btn btn-secondary">Usage Guide</a>
+          <a href="nxs.html" class="btn btn-secondary">NXS Deep Dive</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Nexsiz · Stateful Network Protocol Fuzzer</p>
+      <p class="tagline-footer">precision over noise · depth over breadth · silence until the edge is found</p>
+      <p class="text-muted" style="margin-top: 1rem; font-size: 0.8rem;">Apache License 2.0 · Revana Clarestya</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

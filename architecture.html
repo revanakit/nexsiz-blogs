@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nexsiz Architecture – four-layer design, plugins, coverage, and NXS integration.">
+  <title>Architecture – Nexsiz</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">nex<span>siz</span></a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html">About</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="usage.html">Usage</a></li>
+        <li><a href="nxs.html">NXS</a></li>
+        <li><a href="architecture.html" class="active">Architecture</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <h1>Architecture</h1>
+      <p>Four-layer design with trait-based plugins, hybrid coverage, and non-blocking NXS integration.</p>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="container">
+        <div class="section-title"><h2>Layer Overview</h2></div>
+        <div class="arch-box">┌─────────────────────────────────────────────────────────────────┐
+│                  Monitoring · Oracle · NXS                        │
+│  crash / hang detection · differential &amp; sanitizer oracles       │
+│  minimizer · structured logging · existence-script spawn         │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+┌───────────────────────────────┴─────────────────────────────────┐
+│                 Execution &amp; Efficiency Layer                     │
+│  worker pool · intelligent connection reuse · TCP / UDP          │
+│  process monitor · optional LibAFL Executor + LLMP Launcher      │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+┌───────────────────────────────┴─────────────────────────────────┐
+│             State Awareness + Coverage Feedback                  │
+│  hybrid state tracker · adaptive transition predictor            │
+│  CoverageProvider (null | map+shm | software)                    │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+┌───────────────────────────────┴─────────────────────────────────┐
+│                      Input Construction                          │
+│  semantic field model · hierarchical mutator                     │
+│  protocol-aware integrity repair pipeline                        │
+│  optional LibAFL Mutator adapter                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title"><h2>Module Map</h2></div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3><code>src/input/</code></h3>
+            <p>Corpus management, semantic model, hierarchical mutator, integrity repair pipeline.</p>
+          </div>
+          <div class="card">
+            <h3><code>src/state/</code></h3>
+            <p>Hybrid state tracker and adaptive transition predictor.</p>
+          </div>
+          <div class="card">
+            <h3><code>src/execution/</code></h3>
+            <p>Engine, workers, connector, connection reuse, process monitor, optional LibAFL path.</p>
+          </div>
+          <div class="card">
+            <h3><code>src/coverage/</code></h3>
+            <p>CoverageProvider trait, shared-memory map, software provider, registry.</p>
+          </div>
+          <div class="card">
+            <h3><code>src/monitor/</code></h3>
+            <p>Logger, minimizer, oracle orchestration.</p>
+          </div>
+          <div class="card">
+            <h3><code>src/plugin/</code></h3>
+            <p>Protocol, Integrity, Oracle, Encryptor plugins + registry and pipeline.</p>
+          </div>
+          <div class="card">
+            <h3><code>src/nxs/</code></h3>
+            <p>Meta writer, resolve, non-blocking spawn, rate limiter, async reaper.</p>
+          </div>
+          <div class="card">
+            <h3><code>src/scripting/</code></h3>
+            <p>RPC server, bridges for mutator/oracle/integrity/encryptor, Python client support.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-title"><h2>NXS Integration (Hot-path Safe)</h2></div>
+        <p class="section-lead">When an event is classified, the engine calls <code>nxs::on_event</code>. The path is carefully designed so the fuzzer never blocks on external processes.</p>
+        <ul class="feature-list">
+          <li>Write metadata JSON to <code>nxs-meta/</code></li>
+          <li>Resolve the configured NXS set for the event</li>
+          <li>Apply rate limits (cooldown, per-event, total)</li>
+          <li>Spawn each allowed binary non-blocking</li>
+          <li>Hand the <code>Child</code> to the background reaper</li>
+          <li>Exit code 2 → secondary finding recorded in JSONL + atomic counter</li>
+        </ul>
+        <div class="callout mt-3">
+          <p>The reaper thread polls with <code>try_wait</code> every 250 ms. Zombies are cleaned without ever touching the worker hot path.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title"><h2>Coverage Pipeline</h2></div>
+        <ol class="feature-list" style="list-style: decimal; padding-left: 1.5rem;">
+          <li>Nexsiz creates / attaches the SHM region (<code>/nexsiz-cov-&lt;id&gt;</code>, 65536 bytes)</li>
+          <li>Map is zeroed before every execution</li>
+          <li>Frida agent (or software provider) increments edge cells: <code>(prev &gt;&gt; 1) ^ cur</code></li>
+          <li>After execution the provider harvests hits and feeds the state / scheduling layer</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-title"><h2>Design Constraints</h2></div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Minimal Dependencies</h3>
+            <p>Default build uses only <code>libc</code>. LibAFL, serde, and related crates are strictly optional behind the <code>libafl</code> feature.</p>
+          </div>
+          <div class="card">
+            <h3>Trait-based Extensibility</h3>
+            <p>New Protocol, Integrity, Oracle, or Encryptor implementations can be registered at runtime without recompiling the core.</p>
+          </div>
+          <div class="card">
+            <h3>Operational Silence</h3>
+            <p>No unnecessary noise. Status lines, secondary findings, and NXS logs are intentional and structured.</p>
+          </div>
+          <div class="card">
+            <h3>Reproducibility</h3>
+            <p>Deterministic RNG seed, structured meta files, and minimised crash inputs support later analysis and reporting.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container" style="text-align: center;">
+        <p class="mono text-muted" style="margin-bottom: 1.5rem;">precision over noise · depth over breadth · silence until the edge is found</p>
+        <div class="btn-group">
+          <a href="index.html" class="btn btn-primary">Back to About</a>
+          <a href="usage.html" class="btn btn-secondary">Usage Guide</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Nexsiz · Stateful Network Protocol Fuzzer</p>
+      <p class="tagline-footer">precision over noise · depth over breadth · silence until the edge is found</p>
+      <p class="text-muted" style="margin-top: 1rem; font-size: 0.8rem;">Apache License 2.0 · Revana Clarestya</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

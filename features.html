@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nexsiz Features – Semantic mutation, hybrid coverage, NXS, oracles, plugins and more.">
+  <title>Features – Nexsiz</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">nex<span>siz</span></a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html">About</a></li>
+        <li><a href="features.html" class="active">Features</a></li>
+        <li><a href="usage.html">Usage</a></li>
+        <li><a href="nxs.html">NXS</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <h1>Features</h1>
+      <p>Everything that makes Nexsiz capable of exploring deep protocol state machines while remaining operationally reliable.</p>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="container">
+        <div class="section-title"><h2>Core Capabilities</h2></div>
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="card-icon">01</div>
+            <h3>Semantic Mutation</h3>
+            <p>Hierarchical field / message / sequence mutators that preserve protocol grammar instead of producing pure noise.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">02</div>
+            <h3>Integrity Repair</h3>
+            <p>Automatic restoration of length fields, checksums, framing, and terminators after every mutation.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">03</div>
+            <h3>Hybrid Coverage</h3>
+            <p>Black-box response observation + true grey-box edge coverage via AFL-style SHM map and Frida agent.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">04</div>
+            <h3>State Awareness</h3>
+            <p>Hybrid state tracker combined with adaptive transition prediction to bias toward promising paths.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">05</div>
+            <h3>Connection Reuse</h3>
+            <p>Intelligent stateful TCP reuse with safety-prefix detection to avoid cross-test contamination.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">06</div>
+            <h3>NXS Existence Scripts</h3>
+            <p>Post-event actors that deepen findings (repro, differential, timeout, notify) without blocking the hot path.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title"><h2>Plugin System</h2></div>
+        <p class="section-lead">Trait-based extensibility. Register new behaviour without touching the core.</p>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Protocol Models</h3>
+            <p>Built-in: <code>ftp</code>, <code>smtp</code>, <code>http</code>, <code>generic</code>. Custom models can be added via the plugin registry.</p>
+          </div>
+          <div class="card">
+            <h3>Integrity Strategies</h3>
+            <p><code>default</code>, <code>http</code>, <code>ftp</code>, <code>smtp</code>, <code>binary</code>, <code>null</code> — repair length, checksums and framing after mutation.</p>
+          </div>
+          <div class="card">
+            <h3>Oracles</h3>
+            <p>
+              <code>default</code> · <code>strict</code> · <code>crash</code> · <code>hang</code> · <code>coverage</code><br>
+              <code>differential</code> · <code>sanitizer</code> · <code>diffsan</code> · <code>expanded</code>
+            </p>
+            <p class="mt-2 text-muted" style="font-size: 0.9rem;">
+              <code>diffsan</code> (differential + sanitizer + coverage) is recommended for deep campaigns.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Encryptors</h3>
+            <p>
+              <code>null</code> · <code>xor</code> · <code>chacha20</code> · <code>tls-record</code><br>
+              Combinations: <code>chacha20+tls</code>, <code>xor+tls</code>
+            </p>
+            <p class="mt-2 text-muted" style="font-size: 0.9rem;">Key material via <code>-k</code> or environment variables.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-title"><h2>Coverage Providers</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Flag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>null</code></td>
+                <td><code>-C null</code></td>
+                <td>No coverage feedback (black-box only)</td>
+              </tr>
+              <tr>
+                <td><code>map</code></td>
+                <td><code>-C map</code></td>
+                <td>AFL-style 64 KiB edge map via POSIX shared memory (Frida agent)</td>
+              </tr>
+              <tr>
+                <td><code>software</code></td>
+                <td><code>-C software</code></td>
+                <td>Software-based coverage when external instrumentation is unavailable</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <p>For true grey-box: instrument the target with the Frida agent (<code>agents/frida/nexsiz_cov.js</code>) and run Nexsiz with <code>-C map --shm &lt;id&gt;</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-title"><h2>Execution Paths</h2></div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Native Path (default)</h3>
+            <p>Minimal dependency surface. Only <code>libc</code> is required. High-throughput worker pool with intelligent connection reuse and process monitoring.</p>
+          </div>
+          <div class="card">
+            <h3>LibAFL Path (optional)</h3>
+            <p>Enable with <code>--features libafl</code> and <code>-L</code>. Provides LibAFL Executor, hierarchical mutator adapter, and LLMP multi-core launcher.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-title"><h2>Campaign Control &amp; Observability</h2></div>
+        <ul class="feature-list">
+          <li><strong>RPC surface</strong> — Unix domain socket for out-of-process Python campaign control</li>
+          <li><strong>Structured output</strong> — crashes, hangs, minimised inputs, NXS meta &amp; findings</li>
+          <li><strong>Deterministic RNG</strong> — reproducible campaigns via <code>-r</code></li>
+          <li><strong>Limits</strong> — stop after N executions or after a time budget</li>
+          <li><strong>Verbose logging</strong> — full visibility into worker activity and NXS spawns</li>
+          <li><strong>Secondary findings</strong> — NXS exit code 2 is escalated and recorded in JSONL</li>
+        </ul>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-secondary);">
+      <div class="container" style="text-align: center;">
+        <h2 style="margin-bottom: 1rem;">See it in action</h2>
+        <p class="text-muted" style="margin-bottom: 2rem;">Detailed CLI reference, examples, and NXS workflow.</p>
+        <div class="btn-group">
+          <a href="usage.html" class="btn btn-primary">Usage Guide</a>
+          <a href="nxs.html" class="btn btn-secondary">NXS Documentation</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Nexsiz · Stateful Network Protocol Fuzzer</p>
+      <p class="tagline-footer">precision over noise · depth over breadth · silence until the edge is found</p>
+      <p class="text-muted" style="margin-top: 1rem; font-size: 0.8rem;">Apache License 2.0 · Revana Clarestya</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
